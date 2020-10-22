@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block csscontent %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+
+    <div class="col-lg-12">
+    <h1 class="h1 bg-info">创建场景输入模板</h1>
+    <section>根据以下标准和规范制定此模板
+        <ul>
+            <li><code><<网络和系统安全防护检查评分方法>></code></li>
+            <li><code >GB/T 20274 信息系统安全保障评估框架</code></li>
+            <li><code>GB/T 20984-2007 <<信息安全风险评估规范>></code></li>
+        </ul>
+    </section>
+    <form class="form-group" id="formtemplate" method="post">
+        <div class="form-group">
+            <label class="danger">模板名字：</label><input type="text" class="input text-primary" name="templatename">
+            <span class="text-danger" >*</span>
+        </div>
+        <div class="form-group">
+            场景规模：<span><input type="number" class="input" name="nodesizes"><span class="text-danger">*</span>节点数目</span>
+
+
+        </div>
+
+        <div class="row form-group">
+        <div class="col-md-12 form-group bg-success">
+            参数选择：
+        </div>
+        <section>
+            <code>指标选取的依据来源：王志平. 基于指标体系的网络安全态势评估研究[D]. 国防科学技术大学, 2010.
+                    <p>杨林, 于全. 动态赋能网络空间防御[M]. 人民邮电出版社, 2016.</p>
+                <p>陈丽莎, 张凤荔, 王娟. 构建网络安全态势评估指标体系[J]. 重庆科技学院学报:自然科学版, 2008, 10(3):135-137.</p>
+            </code>
+        </section>
+            {%  for one in data['indexlist'] %}
+
+                <div class="col-md-4 form-group">
+                  <input name="args" type="checkbox" value="{{ one['indexname'] }}{{ one['description'] }}" >{{ one['indexname'] }}{{ one['description'] }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+    <div class="col-md-12 form-group bg-success">
+        系统节点：
+
+    </div>
+    <section> <code>依据GB/T28449-2012 信息系统安全等级保护测评过程指南的测评对象确定原则和方法，结合资产重要程度赋值结果，描述本测评对象的选择规则和方法</code></section>
+
+    {% for one in data['nodetypelist'] %}
+
+         <div class="col-md-4 form-group" >
+        <input name="nodelist" type="checkbox" value="name" >{{ one['name'] }}
+
+
+        </div>
+
+
+    {% endfor %}
+        <div class="col-md-12 form-group bg-success">
+        服务类型选择：
+    </div>
+
+    {% for one in data['servicelist'] %}
+        <div class="col-md-4 form-group" >
+        <input name="nodelist" type="checkbox" value="name" >{{ one['name'] }}
+         <span>权重<input type="number"></span>
+        </div>
+    {% endfor %}
+
+
+      <div class="col-md-12 form-group bg-success">
+        漏洞评分：
+    </div>
+    <section>
+         <code>注：重要设备包括内外网隔离设备，内部安全域划分设备，互联网直联设备，网络业务核心设备
+        <p>中高危漏洞以国内外权威的CVE漏洞库和国家互联网应急中心CNVD漏洞库为基本判断依据，对于高危Web安全隐患，以国际上公认的开放式Web应用程序安全项目(OWASP)确定最新的Top10中所列的WEB安全隐患判断标准</p>
+        <p>其他安全隐患指的是可能导致用户信息泄露，重要设备受控，业务中断，网络中断等重大网络安全事件的隐患</p>
+    </code>
+    </section>
+    <table class="table table-striped table-condensed ">
+        <tr>
+            <th>安全隐患类型</th>
+            <th>重要设备</th>
+            <th>其他设备</th>
+        </tr>
+        <tr>
+            <td>高危漏洞</td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+        </tr>
+          <tr>
+            <td>中危漏洞</td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+        </tr>
+          <tr>
+           <td>弱口令</td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+
+        </tr>
+          <tr>
+            <td>其他安全隐患</td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+
+        </tr>
+    </table>
+
+    <div class="col-md-12 form-group bg-success">
+        等级测评表
+    </div>
+    <table class="table table-striped table-condensed">
+        <tr>
+            <td>测评结论</td>
+            <td>判断依据</td>
+            <td>得分</td>
+        </tr>
+        <td><input type="text" value="符合"></td>
+        <td><textarea cols="50" rows="3">系统中没有发现安全问题，等级测评结果为满分</textarea></td>
+        <td><input type="text" value="100"></td>
+
+        <tr>
+            <td><input type="text" value="基本符合"></td>
+            <td><textarea cols="50" rows="3">系统中存在安全问题，但是不会导致系统受到高危风险</textarea></td>
+            <td><input type="text" value="60<=x<100"></td>
+        </tr>
+        <tr>
+            <td><input type="text" value="不符合"></td>
+            <td><textarea cols="50" rows="3">系统中存在安全问题，会导致系统受到高危风险</textarea></td>
+            <td><input type="text" value="0<=x<60"></td>
+        </tr>
+    </table>
+
+        <button type="button" onclick="createmplate()" value="提交" class="btn btn-success">提交</button>
+
+    </form>
+    </div>
+
+{% endblock %}
+{% block jscontent %}
+    {{ super() }}
+    <script src="../static/js/createmplate.js"></script>
+{% endblock jscontent %}

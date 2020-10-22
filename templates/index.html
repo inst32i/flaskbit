@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>小型原型系统</title>
+    <link rel="icon" href="../static/img/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="../static/img/favicon.ico" type="image/x-icon"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- 引入 Bootstrap -->
+    <link href="../static/css/bootstrap.v3.3.7.min.css" rel="stylesheet">
+    <link href="../static/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet" type="text/css" />
+    <!-- HTML5 Shiv 和 Respond.js 用于让 IE8 支持 HTML5元素和媒体查询 -->
+    <!-- 注意： 如果通过 file://  引入 Respond.js 文件，则该文件无法起效果 -->
+    <!--[if lt IE 9]>
+         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+      <![endif]-->
+
+    {% block csscontent %}
+
+    {% endblock csscontent %}
+
+
+</head>
+<body >
+
+{% include 'header.html' %}
+
+<div class="row">
+    <canvas id="q"></canvas>
+</div>
+
+<div id="main" style=" position:absolute;z-index:100;top:33.3%;width:auto;height:auto;color:white;font-size:50px;">
+    网络系统安全量化评估实验系统</br></br>
+   
+    </br><div style="font-size:40px;float:right;">北京理工大学</div>
+</div>
+
+<script type="text/javascript">
+var s = window.screen;
+var width = q.width = s.width;
+var height = q.height = s.height;
+var letters = Array(256).join(1).split('');
+var _div=document.getElementById("main");
+    _div.style.left=13+"%";//给主页面left定位;
+    _div.style.right=12+"%";//给主页面right定位;
+var draw = function () {
+q.getContext('2d').fillStyle='rgba(0,0,0,.05)';
+q.getContext('2d').fillRect(0,0,width,height);
+q.getContext('2d').fillStyle='#0F0';
+letters.map(function(y_pos, index){
+text = String.fromCharCode(3e4+Math.random()*33);
+x_pos = index * 10;
+q.getContext('2d').fillText(text, x_pos, y_pos);
+letters[index] = (y_pos > 758 + Math.random() * 1e4) ? 0 : y_pos + 10;
+});
+};
+setInterval(draw, 33);
+
+</script>
+
+</body>
+
+
+
+
+
+</html>

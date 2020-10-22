@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block csscontent %}
+    {{ super() }}
+<link href="../static/css/manifold_show.css" rel="stylesheet" type="text/css"/>
+
+<script src="../static/js/plotly.js"></script>
+
+{% endblock csscontent %}
+{% block content %}
+
+
+<div id="corecontent">
+
+    <section >
+
+       <h2 class="h2">算法构建方法</h2>
+        {{algorithm_steps}}
+
+        <ol>
+            <li> 将整个网络系统的特征空间看成一个流形，在每个时间点，网络系统中的n个指标值是安全风险的特征输入；从而构建黎曼流形。获取所有的指标，并进行数据预处理</li>
+            <li>取每个时刻的单个设备的指标，计算每一个节点的指标构成的方阵，组合计算得到单个设备在时间刻的特征量；
+                方阵的迹作为当前设备作为网络系统的特征量的输入\( tr(B)=\sum _{ i=1 }^{ n}{ \lambda_{i}  } \)</li>
+
+            <li> 将所有设备的特征量通过高维映射，将数据从n维变为\( (n^2-n)/2\)维,形成光滑流形，并构建二次型，构成黎曼流形；通过光滑映射函数，将节点特征值映射到黎曼流形；半正定二次型特征矩阵
+只计算变化的大小，而忽略变化的方向，旋转和拉伸。</li>
+           $$ \begin{bmatrix} x \\ y \end{bmatrix}=\begin{bmatrix} K< x,x> & K< x,y> \\ K< y,x> & K< y,y> \end{bmatrix} $$
+            \[ K< x,y>=||tr(B)-tr(A)||_{ 2 }^{ 2 }=e^{ -\frac { (tr(B)-tr(A))^{ 2 } }{ 2 }  } \]
+            <li> 在黎曼流形上计算网络系统的特征量，计算得到度矩阵D和拉普拉斯矩阵，得到在流形中网络的特征量求和\( L=D-W \) 拉普拉斯特征映射可以将流形上的数据，在尽量保持相似度的情况下，嵌入到低维欧式空间</li>
+            <li>计算整个网络系统的安全风险度量值; \(Q=tr(L) \)</li>
+            <li>求取所有的时间序列构成的特征值序列，从而在特征黎曼流形空间中形成了一条行为轨迹</li>
+            <li>对计算结果进行等级划分，并给出解释</li>
+            
+
+        </ol>
+
+
+    </section>
+    <code>采用第一个时刻和其中的某一台设备进行举例：</code>
+    <section>
+        <h2 class="h2">
+            获取所有的指标，并进行数据预处理-方法：均值标准化
+
+        </h2>
+        <div> 获得的初始指标
+             $$  Index(B)=\begin{bmatrix}
+        {%  for row in examhost['indexlist'] %}
+          & {{ row }}&
+        {% endfor  %}
+        \\
+        \end{bmatrix} $$
+        </div>
+        <div>得到指标的方阵B：
+
+         $$  Matrix(B)=\begin{bmatrix}
+        {%  for row in examhost['index'] %}
+            {% for unit in row %}
+                & {{ unit | round(2, 'floor')  }} &
+            {% endfor %}
+            \\
+        {% endfor  %}
+        \end{bmatrix} $$
+
+        </div>
+
+
+
+    </section>
+    <section >
+        <h2>计算得到单个设备在时间刻的风险态势值</h2>
+        <div>计算方阵的迹\( tr(B)={{ examhost['trace']| round(2, 'floor')  }} \)</div>
+    </section>
+    <section>
+        <h2>从欧式空间光滑映射到高维黎曼流形</h2>
+        <div>得到当前时刻所有的设备的风险态势值
+            \( tr(i)=[ {{ example[1]['trace'] | round(2, 'floor')  }},{{ example[2]['trace'] | round(2, 'floor')  }},{{ example[2]['trace']  | round(2, 'floor') }}] \)
+        </div>
+
+    </section>
+    <section>
+         <h2 class="h2">计算高维空间中的风险态势</h2>
+         <div>
+             将所有的迹作为输入，构建拉普拉斯矩阵，并利用光滑映射函数，采用的函数是内积函数，映射到高维空间，将3维变为6维
+         \[  K< x , y >=e^{ -\frac { (x-y)^{ 2 } }{ 2 }  } \]
+             $$
+
+            \begin{bmatrix}  x & y & z \end{bmatrix}
+             =>\begin{bmatrix}
+             < x , x > & < x,y>& < x,z> \\
+             < x,y>& < y,y> & < y,z> \\
+             < x,z> & < z,y> & < z,z>
+
+             \end{bmatrix}
+             $$
+             $$
+             L=\begin{bmatrix}
+                {% for row in example['weimat'] %}
+                 {% for col in row %}
+                   & {{ col }}&
+                {% endfor %}
+                    \\
+                {% endfor %}
+             \end{bmatrix}
+             $$
+          \[ 通过计算矩阵的迹，得到网络的风险值={{ example['indexsum']    }}\]
+         </div>
+    </section>
+
+    <section>
+        <h2 class="h2">网络拓扑结构展示</h2>
+        <div id="topology" >
+
+        </div>
+    </section>
+
+    <section>
+    <h2 class="h2">高维空间的数据的图像展示</h2>
+
+    <div id="heatmap"></div>
+</section>
+<section>
+    <h2 class="h2">结果展示</h2>
+    <span>计算结果为<p>
+       风险值序列在特征黎曼流形上形成了一条行为轨迹，  $$风险值序列=\begin{bmatrix}
+                {% for row in data.result %}
+                     & {{ row['y'] }} &
+
+                {% endfor %}
+                    \\
+             \end{bmatrix}   $$</p></span>
+    <div id="resultshow" style="width: 100%; height: 500px;"></div>
+    <div>
+        如图所示，通过看到安全和不安全状态是有区别，通过设定基线可以进行划分。
+    </div>
+</section>
+
+
+</div>
+
+
+
+
+
+{% endblock content %}
+{% block jscontent %}
+{{ super() }}
+    <script type="text/javascript"
+
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async>
+    </script>
+
+
+
+<script type="text/javascript" src="../static/js/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async ></script>
+
+<script src="../static/js/d3.v3.min.js"></script>
+{#    网络拓扑图#}
+ <script src="https://cdn.bootcss.com/three.js/89/three.js"></script>
+    <script src="../static/js/three.js" ></script>
+  <script src="../static/js/three-trackballcontroll.min.js"></script>
+  <script src="../static/js/three-forcegraph.min.js"></script>
+
+
+<script src="../static/js/manifold_show.js"></script>
+
+
+<script src="../static/js/d3.v4.js"></script>
+
+<script src="//d3js.org/d3-contour.v1.min.js"></script>
+
+
+
+<script>
+
+
+
+
+</script>
+
+{% endblock jscontent %}

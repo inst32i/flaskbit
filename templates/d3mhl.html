@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% block csscontent %}
+
+    {{ super() }}
+    <style>
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 4.5px;
+        }
+
+        section {
+            margin: 20px;
+        }
+
+        table, table tr th, table tr td {
+            width: 80px;
+            border: 1px solid #0094ff;
+            table-layout: fixed;
+            text-align: center;
+        }
+
+        #predictvalue tr td span {
+            width: 200px;
+        }
+
+    </style>
+
+    <link href="../static/css/fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" media="all" type="text/css">
+    <link href="../static/themes/explorer-fa/theme.css" media="all" rel="stylesheet" type="text/css"/>
+     <link href="../static/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../static/css/manifold_show.css" rel="stylesheet" type="text/css"/>
+    <script src="../static/js/plotly.js"></script>
+{% endblock csscontent %}
+{% block content %}
+    {{ all }}
+
+    <article>
+        <section>
+            <h1 class="h1">多层多维模型简介（3M）</h1>
+            <ul>
+                <li>分为3个层次，攻击层、资源层、物理层</li>
+                <li>每层有1或者2个维度，从不同角度对每一层进行度量</li>
+                <li>一共提供三个粒度，用户根据需求选择</li>
+            </ul>
+        </section>
+        <section>
+            <h1>3M模型层次图</h1>
+            <img src="../static/img/d3mhl.png" widht="500" height="400">
+        </section>
+     <h4 style="color: blue">网络拓扑结构展示</h4>
+                <section>
+                 <div id="topology" >
+                 </div>
+                 </section>
+                 <section>
+               <div id="resultshow" hidden="hidden"></div>
+               </section>
+     <section>
+       <div class="col-offset-4 col-md-8">
+                <h4 style="color: blue">攻击层</h4>
+                在这一层只考虑网络之间各个节点之间的关系而不考虑每一个节点所拥有的资源以及节点的安全配置、性能等<br>
+                度量分别为可靠性维度，漏洞维度<br>
+                可靠性维度:对所有节点的连通性和连通效率进行考量<br>
+                漏洞维度:对所有节点的漏洞进行CVSS评分并进行计算
+                <h4 style="color:yellowgreen">可靠性维度</h4>
+       <font face="隶书"> 可靠性计算方法：对网络中弱连通分量和强连通分量进行考量 </font> </br>
+                <h4>网络连通分量个数 {{ connectedCount }}</h4>
+                 <h4>网络连通分量计算公式</h4>
+                    Mv=(-d+1)/(V-1) * 10+10
+                <h4>网络连通分量计算结果</h4>
+                <h2>{{ connectResult }}</h2>
+       <h4 style="color:yellowgreen">漏洞维度</h4>
+            <table class="table table-condensed">
+                    <caption>节点漏洞展示</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>主机编号</td>
+                        <td>主机名字</td>
+                        <td>主机重要性</td>
+                        <td>漏洞名字</td>
+                        <td>漏洞评分</td>
+                    </tr>
+                    {% for d in node_vul%}
+                    <tr class="info">
+                              <td>{{ d.nodeid }}</td>
+                            <td>{{ d.nodeName }}</td>
+                            <td>{{ d.importance }}</td>
+                            <td>{{ d.vulName }}</td>
+                            <td>{{ d.v2score }}</td>
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+       <hr>
+       <font face="隶书"> 单节点漏洞维计算方法：综合节点上所有漏洞的CVSS评分 </font> </br>
+       <table class="table table-condensed">
+                    <caption>单节点漏洞维</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>主机编号</td>
+                        <td>主机名字</td>
+                        <td>漏洞评分</td>
+                    </tr>
+                    {% for d in vulnerabilities%}
+                    <tr class="info">
+                            <td>{{ d.nodeid }}</td>
+                            <td>{{ d.nodeName }}</td>
+                            <td>{{ d.score }}</td>
+{#                            <td>{{ d.service }}</td>#}
+{#                            <td>{{ d.serviceImportance}}</td>#}
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+
+        <font face="隶书"> 子网漏洞维计算方法：综合子网中每个节点的漏洞评分得出子网漏洞总评分 </font> </br>
+       <table class="table table-condensed">
+                    <caption>子网漏洞维</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>子网名称</td>
+                        <td>漏洞评分</td>
+                    </tr>
+                    {% for d in subVulnerability%}
+                    <tr class="info">
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.value }}</td>
+{#                            <td>{{ d.service }}</td>#}
+{#                            <td>{{ d.serviceImportance}}</td>#}
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+{#            <h4>环境层</h4>#}
+{#             <div class="col-offset-4 col-md-8">#}
+{#                <table class="table table-condensed">#}
+{#                    <caption>网络节点展示</caption>#}
+{#                    <tbody>#}
+{#                    <tr class="active">#}
+{#                        <td>名称</td>#}
+{#                        <td>重要性</td>#}
+{#                    </tr>#}
+{#                    {% for d in nodes%}#}
+{#                    <tr class="info">#}
+{#                            <td>{{ d.name }}</td>#}
+{#                            <td>{{ d.importance}}</td>#}
+{#                    </tr>#}
+{#                     {% endfor %}#}
+{#                    </tbody>#}
+{#                </table>#}
+
+{#                <h4>服务维度计算方法</h4>#}
+{#                对网路中资源以及服务进行考量<br>#}
+{#                 资源：通过攻击者从外界因特网进入获得资源所需要的攻击的路径长度入手进行度量 <br>#}
+{#                 单个节点服务基本度量规则：每个节点资源的重要性除以资源的获取难度乘服务重要性<br>#}
+{#                 子网基本度量规则：子网中所有节点服务度量结果之和<br>#}
+
+{#                    <table class="table table-condensed">#}
+{#                        <caption>物理维度量结果</caption>#}
+{#                        <tbody>#}
+{#                        <tr class="active">#}
+{#                            <td>名称</td>#}
+{#                            <td>度量值</td>#}
+{#                        </tr>#}
+{#                        {% for d in sum %}#}
+{#                        <tr class="info">#}
+{#                                <td>{{ d.name}}</td>#}
+{#                                <td>{{ d.value}}</td>#}
+{#                        </tr>#}
+{#                         {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                <H5>{{ sum }}</H5>#}
+{#             </div>#}
+     <hr>
+            <div class="col-offset-4 col-md-8">
+                <h4 style="color: blue">资源层</h4>
+             对网路中资源维度以及指标项维度进行考量<br>
+            资源：通过攻击者从外界因特网进入获得资源所需要的攻击的路径长度入手进行度量 <br>
+                 指标项：对网路中各项指标变化进行度量<br>
+                <table class="table table-condensed">
+                    <caption>网络节点及服务展示</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>节点编号</td>
+                        <td>节点名称</td>
+                        <td>节点重要性</td>
+                        <td>服务名称</td>
+                        <td>重要性</td>
+                    </tr>
+{#                    services{{ services }}#}
+                    {% for d in services%}
+                    <tr class="info">
+                            <td>{{ d.id }}</td>
+                            <td>{{ d.nodeName }}</td>
+                            <td>{{ d.importance }}</td>
+                            <td>{{ d.serviceName }}</td>
+                            <td>{{ d.serviceImportance}}</td>
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+{#            <h4>资源维计算方法</h4>#}
+{#                资源分布维度指的是同一台主机上同时存在资源及其系统缺陷的联合度量维度<br>#}
+{#                对于一个主机，若其资源越重要但其存在的缺陷也很严重，那就存在被攻击的隐患<br>#}
+{#                基本度量规则即为每个节点资源的重要性乘以其上服务重要性<br>#}
+               <h4 style="color:yellowgreen">服务维度</h4>
+            <font face="隶书"> 单个节点服务基本度量规则：每个节点资源的重要性除以资源的获取难度乘服务重要性 </font> </br>
+             <table class="table table-condensed">
+                        <caption>节点服务维度量结果</caption>
+                        <tbody>
+                        <tr class="active">
+                            <td>编号</td>
+                            <td>名称</td>
+                            <td>度量值</td>
+                        </tr>
+                        {% for d in nodesService %}
+                        <tr class="info">
+                                <td>{{ d.id }}</td>
+                                <td>{{ d.name}}</td>
+                                <td>{{ d.value}}</td>
+                        </tr>
+                         {% endfor %}
+                        </tbody>
+                    </table>
+                <font face="隶书"> 子网基本度量规则：子网中所有节点服务度量结果之和 </font> </br>
+            <table class="table table-condensed">
+                        <caption>子网服务维度量结果</caption>
+                        <tbody>
+                        <tr class="active">
+                            <td>名称</td>
+                            <td>度量值</td>
+                        </tr>
+                        {% for d in serviceAll %}
+                        <tr class="info">
+                                <td>{{ d.name}}</td>
+                                <td>{{ d.value}}</td>
+                        </tr>
+                         {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+<div class="col-offset-4 col-md-8">
+       <h4 style="color:yellowgreen">指标维度</h4>
+ <font face="隶书"> 节点基本度量规则：该指标低于平均值认为安全，高于平均值而处于指标上升状态则不安全，高于平均值且处于下降状态则安全  </font> </br>
+      <table class="table table-condensed">
+                        <caption>单节点单指标维度量</caption>
+                        <tbody>
+                        <tr class="active">
+                            <td>主机编号</td>
+                            <td>指标名字</td>
+                            <td>评估结果</td>
+                        </tr>
+                        {% for d in allDynIndex %}
+                        <tr class="info">
+                                <td>{{ d.nodeid }}</td>
+                                <td>{{ d.indexname}}</td>
+                                <td>{{ d.value}}</td>
+                        </tr>
+                         {% endfor %}
+                        </tbody>
+      </table>
+  <table class="table table-condensed">
+                        <caption>单节点多指标维度量</caption>
+                        <tbody>
+                        <tr class="active">
+                            <td>主机编号</td>
+                            <td>评估结果</td>
+                        </tr>
+                        {% for d in allNetIndex %}
+                        <tr class="info">
+                                <td>{{ d.nodeid }}</td>
+                                <td>{{ d.value}}</td>
+                        </tr>
+                         {% endfor %}
+                        </tbody>
+      </table>
+ <font face="隶书"> 子网基本度量规则：子网中安全节点个数超过三分之二则子网安全，否则视为不安全 </font> </br>
+ <table class="table table-condensed">
+                        <caption>子网指标维度量</caption>
+                        <tbody>
+                        <tr class="active">
+                            <td>子网名字</td>
+                            <td>评估结果</td>
+                        </tr>
+                        {% for d in subIndexValue %}
+                        <tr class="info">
+                                <td>{{ d.name }}</td>
+                                <td>{{ d.value}}</td>
+                        </tr>
+                         {% endfor %}
+                        </tbody>
+      </table>
+            </div>
+
+     <div class="col-offset-4 col-md-8">
+                <h4 style="color: blue">物理层</h4>
+                <table class="table table-condensed">
+                    <caption>网络链路展示</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>源节点</td>
+                        <td>源节点重要性</td>
+                        <td>目标节点</td>
+                        <td>目标节点重要性</td>
+                        <td>链路重要性</td>
+                    </tr>
+                    {% for d in links%}
+                    <tr class="info">
+                            <td>{{ d.source }}</td>
+                            <td>{{ d.sourceImportance }}</td>
+                            <td>{{ d.target }}</td>
+                            <td>{{ d.targetImportance }}</td>
+                            <td>{{ d.importance}}</td>
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+                </table>
+       <h4 style="color:yellowgreen">链路维度</h4>
+          链路维度指的是对网络中不同的连接路径进行度量<br>
+          对于一条连接路径，若其连接的两个节点的资源越重要，被攻击的隐患就越大<br>
+      <font face="隶书">单链路基本度量规则即为每条路径上两个节点资源的重要性乘以其上链路重要性 </font> </br>
+     <table class="table table-condensed">
+                    <caption>节点链路维计算结果</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>源节点</td>
+                        <td>目标节点</td>
+                        <td>链路计算结果</td>
+                    </tr>
+                    {% for d in linksResult%}
+                    <tr class="info">
+                            <td>{{ d.source }}</td>
+                            <td>{{ d.target }}</td>
+                            <td>{{ d.value }}</td>
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+     </table>
+      <font face="隶书"> 子网基本度量规则即为子网中所有路径的链路重要性之和 </font> </br>
+     <table class="table table-condensed">
+                    <caption>子网链路维计算结果</caption>
+                    <tbody>
+                    <tr class="active">
+                        <td>名称</td>
+                        <td>计算结果</td>
+                    </tr>
+                    {% for d in subLinks%}
+                    <tr class="info">
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.value }}</td>
+                    </tr>
+                     {% endfor %}
+                    </tbody>
+     </table>
+     <h4 style="color: blue">网络总计算结果</h4>
+     <h4 style="color:yellowgreen">全网子网</h4>
+      <font face="隶书"> 子网计算规则：根据三个层次进行综合度量，如果度量结果大于0.6则不安全，否则安全 </font> </br>
+
+      <table class="table table-condensed">
+                    <caption>子网计算结果</caption>
+          <tbody>
+                    <tr class="active">
+                        <td>名称</td>
+                        <td>计算结果</td>
+                    </tr>
+                    {% for d in allSubNet%}
+                    <tr class="info">
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.value }}</td>
+                    </tr>
+                     {% endfor %}
+          </tbody>
+
+        </table>
+     网络安全基线设定为0.6，低于0.6都认为是安全的<br>
+      <font face="隶书">  全网度量规则：网络中安全子网的个数大于全部子网的三分之二视为安全，否则不安全 </font> </br>
+
+{#       <h4 style="color:yellowgreen">全网度量结果</h4>#}
+{#     {{ allNet }}#}
+
+            </div>
+
+         </section>
+
+
+
+</article>
+{% endblock %}
+
+{% block jscontent %}
+{{ super() }}
+    <script type="text/javascript"
+
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async>
+    </script>
+
+<script type="text/javascript" src="../static/js/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async ></script>
+
+<script src="../static/js/d3.v3.min.js"></script>
+{#    网络拓扑图#}
+ <script src="https://cdn.bootcss.com/three.js/89/three.js"></script>
+    <script src="../static/js/three.js" ></script>
+  <script src="../static/js/three-trackballcontroll.min.js"></script>
+  <script src="../static/js/three-forcegraph.min.js"></script>
+
+
+<script src="../static/js/manifold_show.js"></script>
+
+
+<script src="../static/js/d3.v4.js"></script>
+
+<script src="//d3js.org/d3-contour.v1.min.js"></script>
+
+<script>
+    $("#file-1").fileinput({
+            theme: 'fa',
+            uploadUrl: '/d3mhlinputdata', // you must set a valid URL here else you will get an error
+            allowedFileExtensions: ['xls', 'xlsx'],
+            overwriteInitial: false,
+            maxFileSize: 1000,
+            maxFilesNum: 10,
+
+            slugCallback: function (filename) {
+                return filename.replace('(', '_').replace(']', '_');
+            }
+        });
+</script>
+
+
+{% endblock jscontent %}

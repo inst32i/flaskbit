@@ -1,0 +1,88 @@
+{%  extends "base.html" %}
+
+{% block csscontent %}
+
+
+
+    <link href="../static/css/fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" media="all" type="text/css">
+    <link href="../static/themes/explorer-fa/theme.css" media="all" rel="stylesheet" type="text/css"/>
+     <link href="../static/css/style.css" rel="stylesheet" type="text/css" />
+{% endblock csscontent %}
+{% block content %}
+
+
+     <form enctype="multipart/form-data" style="margin: 25px">
+
+
+        <hr>
+        <div class="container">
+
+
+        <div class="form-group">
+        <div class="row">
+
+
+            <h1 class="h1 bg-success">选择下载模板</h1>
+
+            <div class="container row">
+                 {% for one in data['templist'] %}
+                     <div class="col-lg-4">
+                      <div class="">网络规模{{ one['size'] }}个节点</div>
+                        <a href="/download/{{ one['path'] }}">下载{{ one['name'] }}模板</a>
+                     </div>
+
+            {% endfor %}
+
+            <div class="col-lg-4">
+                <a href="/templatecreate" >自定义模板</a>
+            </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <h1 class="h1 bg-success">上传结构数据</h1>
+             <div class="file-loading">
+                <input id="file-1" type="file" name="file" multiple class="file" data-overwrite-initial="false" data-min-file-count="2">
+            </div>
+        </div>
+
+        </div>
+        </div>
+    </form>
+
+
+{% endblock content %}
+
+{% block jscontent %}
+
+
+    <script src="../static/js/jquery.v3.3.1.js"></script>
+    <script src="../static/js/plugins/sortable.js" type="text/javascript"></script>
+    <script src="../static/js/fileinput.js" type="text/javascript"></script>
+
+    <script src="../static/themes/explorer-fa/theme.js" type="text/javascript"></script>
+    <script src="../static/themes/fa/theme.js" type="text/javascript"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.11.0/popper.min.js" type="text/javascript"></script>
+    <script src="../static/js/bootstrap.v3.3.7.min.js" type="text/javascript"></script>
+
+ <script>
+
+    $("#file-1").fileinput({
+        theme: 'fa',
+        uploadUrl: '/inputdata', // you must set a valid URL here else you will get an error
+        allowedFileExtensions: ['txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx','csv','json'],
+        overwriteInitial: false,
+        maxFileSize: 1000,
+        maxFilesNum: 10,
+
+        slugCallback: function (filename) {
+            return filename.replace('(', '_').replace(']', '_');
+        }
+    });
+
+
+</script>
+
+{% endblock jscontent %}

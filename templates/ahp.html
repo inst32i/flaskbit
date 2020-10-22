@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block csscontent %}
+
+    {{ super() }}
+    <style>
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 4.5px;
+        }
+
+        section {
+            margin: 20px;
+        }
+
+        table, table tr th, table tr td {
+            width: 80px;
+            border: 1px solid #0094ff;
+            table-layout: fixed;
+            text-align: center;
+        }
+
+        #predictvalue tr td span {
+            width: 200px;
+        }
+    </style>
+
+{% endblock csscontent %}
+{% block content %}
+
+    <article>
+        <section>
+            <h1 class="h1">构建层次模型</h1>
+            <div id="viz" style="margin:20px"></div>
+        </section>
+        <section>
+            <h1 class="h1">构造判断矩阵</h1>
+            <div class="col-offset-4 col-md-8">
+                <table class="table table-condensed">
+                    <ol>
+                        Top1层分为：主机维(E1) 网络维(E2) 漏洞维(E3)<br>
+                        判断矩阵如下：
+                    </ol>
+                    $$  Top1=\begin{bmatrix}
+                     {%  for row in Top1 %}
+                         {% for unit in row %}
+                             & {{ unit  }} &
+                         {% endfor %}
+                         \\
+                     {% endfor  %}
+                     \end{bmatrix} $$
+                </table>
+            </div>
+
+
+            <div class="col-offset-4 col-md-8">
+                <table class="table table-condensed">
+                    <ol>
+                        E1层分为：
+                        {% for unit in E1_index %}
+                            {{ unit['description']  }}({{ unit['index']  }})
+                        {% endfor %}<br>
+                        判断矩阵如下：
+                    </ol>
+                    $$  E1=\begin{bmatrix}
+                     {%  for row in E1 %}
+                         {% for unit in row %}
+                             & {{ unit  }} &
+                         {% endfor %}
+                         \\
+                     {% endfor  %}
+                     \end{bmatrix} $$
+                </table>
+            </div>
+
+
+            <div class="col-offset-4 col-md-8">
+                <table class="table table-condensed">
+                    <ol>
+                        E2层分为：
+                        {% for unit in E2_index %}
+                            {{ unit['description']  }}({{ unit['index']  }})
+                        {% endfor %}<br>
+                        判断矩阵如下：
+                    </ol>
+                    $$  E2=\begin{bmatrix}
+                     {%  for row in E2 %}
+                         {% for unit in row %}
+                             & {{ unit  }} &
+                         {% endfor %}
+                         \\
+                     {% endfor  %}
+                     \end{bmatrix} $$
+                </table>
+            </div>
+
+
+            <div class="col-offset-4 col-md-8">
+                <table class="table table-condensed">
+                    <ol>
+                        E3层分为：
+                        {% for unit in E3_index %}
+                            {{ unit['description']  }}({{ unit['index']  }})
+                        {% endfor %}<br>
+                        判断矩阵如下：
+                    </ol>
+                    $$  E3=\begin{bmatrix}
+                     {%  for row in E3 %}
+                         {% for unit in row %}
+                             & {{ unit  }} &
+                         {% endfor %}
+                         \\
+                     {% endfor  %}
+                     \end{bmatrix} $$
+                </table>
+            </div>
+
+
+        </section>
+
+        <section>
+            <div class="row col-lg-12">
+                <h1 class="h1">层次排序和一致性检验</h1>
+                <p>Satty提出的一致性检验步骤：</p>
+                <ol>
+                    <li>计算一致性指标 \[ CI=\frac { \lambda _{max}-k }{ k-1 } \]</li>
+                    <li>求解平均随机一致性指标 \( \gamma \)</li>
+                    <li>计算一致性比例\[ CR=\frac {\gamma_{ max }-k }{ \gamma (k-1) } \]</li>
+                </ol>
+            </div>
+
+            <table class="table table-condensed">
+                <caption style="">一致性检验指标参考表</caption>
+                <tbody>
+                <tr class="info">
+                    <td>\(k\)</td>
+
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                    <td>10</td>
+                </tr>
+                <tr class="active">
+                    <td>\(\gamma\)</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0.58</td>
+                    <td>0.9</td>
+                    <td>1.12</td>
+                    <td>1.24</td>
+                    <td>1.32</td>
+                    <td>1.41</td>
+                    <td>1.45</td>
+                    <td>1.49</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h1 class="h1">安全评估</h1>
+            <table id="predictvalue" class="table table-condensed">
+                <caption>安全评估等级表</caption>
+
+                <tbody>
+
+                <tr class="info">
+                    <th>等级</th>
+
+                    <th><span>说明</span></th>
+                    {% for unit in index %}
+                        <th>{{ unit['index']  }}<br>{{unit['description']}}</th>
+                    {% endfor %}
+                </tr>
+                <tr class="active">
+                    <td>很安全(S5)</td>
+
+                    <td><span>具有很强的安全保障能力</span></td>
+                    {% for unit in S5 %}
+                        <td>{{ unit  }}</td>
+                    {% endfor %}
+
+                </tr>
+                <tr class="warning">
+                    <td>安全(S4)</td>
+
+                    <td><span>具有较强的安全保障能力</span></td>
+                    {% for unit in S4 %}
+                        <td>{{unit}}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="danger">
+                    <td>基本安全(S3)</td>
+
+                    <td>具有一定的安全保障能力</td>
+                    {% for unit in S3 %}
+                        <td>{{unit}}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="info">
+                    <td>不安全(S2)</td>
+
+                    <td>存在安全隐患</td>
+                    {% for unit in S2 %}
+                        <td>{{unit}}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="success">
+                    <td>很不安全(S1)</td>
+
+                    <td>安全形势严峻</td>
+                    {% for unit in S1 %}
+                        <td>{{unit}}</td>
+                    {% endfor %}
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <table class="table table-condensed">
+                <caption>指标评价</caption>
+                <tbody>
+                <tr class="active">
+                    <th>指标项</th>
+                    {% for unit in index %}
+                        <th>{{ unit['index']  }}</th>
+                    {% endfor %}
+
+                </tr>
+
+                <tr class="info">
+                    <td>权重指数</td>
+                    {% for unit in index_weights %}
+                         <td>{{ unit  }}</td>
+                    {% endfor %}
+
+
+                </tr>
+                <tr class="warning">
+                    <td>判断等级</td>
+                    {% for unit in indexlist %}
+                         <td>S{{ assess_result[unit]  }}</td>
+                    {% endfor %}
+                </tr>
+
+                </tbody>
+            </table>
+
+            <p>评估结果</p>
+            \[ W=\left[ \begin{matrix}
+            {% for unit in index_weights %}
+                 {{unit}} &
+            {% endfor %}
+             \end{matrix} \right] \]
+            \[ R=\left[ \begin{matrix}
+            {% for unit in indexlist %}
+                 {{assess_result[unit]}} &
+            {% endfor %}
+             \end{matrix} \right] \]
+            \[ Q=W*R^{T}
+            ={{AHP_result.value}}=>S{{AHP_result.value_min}}\sim S{{AHP_result.value_max}}
+
+            \]
+            <p>当前系统的安全在S{{AHP_result.value_min}}到S{{AHP_result.value_max}}之间，系统是{{AHP_review}}的</p>
+        </section>
+
+    </article>
+{% endblock %}
+{% block jscontent %}
+
+
+    <script type="text/javascript" src="../static/js/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async></script>
+
+    <script src="../static/js/d3.v3.min.js"></script>
+
+    <script type="text/javascript">
+
+        //JSON object with the data
+        var treeData = {
+            "name": "网络安全(G)", "weight": 1, "info": "tst", "children": [
+                {
+                    "name": "主机层(E1)", "weight": {{ top1_weights[0] }}, "children": [
+                    {% for unit in E1_index %}
+                        {"name": "{{unit['description']}}({{unit['index']}})", "weight": {{ unit['weight'] }} },
+                    {% endfor %}
+                ]
+                },
+                {
+                    "name": "网络层(E2)", "weight": {{ top1_weights[1] }}, "children": [
+                    {% for unit in E2_index %}
+                        {"name": "{{unit['description']}}({{unit['index']}})", "weight": {{ unit['weight'] }} },
+                    {% endfor %}
+                ]
+                },
+                {
+                    "name": "漏洞层(E3)", "weight": {{ top1_weights[2] }}, "children": [
+                    {% for unit in E3_index %}
+                        {"name": "{{unit['description']}}({{unit['index']}})", "weight": {{ unit['weight'] }} },
+                    {% endfor %}
+
+                ]
+                }
+            ]
+        };
+
+        // Create a svg canvas
+        var vis = d3.select("#viz").append("svg:svg")
+            .attr("width", window.innerWidth)
+            .attr("height", window.innerHeight * 0.65)
+            .append("svg:g")
+            .attr("transform", "translate(200, 0)"); // shift everything to the right
+
+        // Create a tree "canvas"
+        var tree = d3.layout.tree()
+            .size([window.innerHeight * 0.618, window.innerWidth * 0.5]);
+
+        var diagonal = d3.svg.diagonal()
+        // change x and y (for the left to right tree)
+            .projection(function (d) {
+                return [d.y, d.x];
+            });
+
+        // Preparing the data for the tree layout, convert data into an array of nodes
+        var nodes = tree.nodes(treeData);
+        // Create an array with all the links
+        var links = tree.links(nodes);
+
+        console.log(treeData)
+        console.log(nodes)
+        console.log(links)
+
+        var link = vis.selectAll("pathlink")
+            .data(links)
+            .enter().append("svg:path")
+            .attr("class", "link")
+            .attr("d", diagonal)
+
+        var node = vis.selectAll("g.node")
+            .data(nodes)
+            .enter().append("svg:g")
+            .attr("transform", function (d) {
+                return "translate(" + d.y + "," + d.x + ")";
+            })
+
+        // Add the dot at every node
+        node.append("svg:circle")
+            .attr("r", 3.5);
+
+        // place the name atribute left or right depending if children
+        node.append("svg:text")
+            .attr("dx", function (d) {
+                return d.children ? -8 : 8;
+            })
+            .attr("dy", 3)
+            .attr("text-anchor", function (d) {
+                return d.children ? "end" : "start";
+            })
+            .text(function (d) {
+                return d.name + "  " + d.weight;
+            })
+
+        function num(i) {
+            var n = i.toFixed(3);
+            alert(n);
+        }
+    </script>
+{% endblock %}

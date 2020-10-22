@@ -1,0 +1,36 @@
+<header >
+<!--
+    <nav class="navbar navbar-inverse" role="navigation" style="margin-bottom: 0">
+        <div class="container-fluid ">
+           <div class="navbar-header col">
+                <img src="../static/img/logo.png" height="201" width="200" id="logo" >
+           </div>
+            <div class="navbar-header col">
+
+                <a class="navbar-brand active" href="/"><i class="" style="color:white;">微分流形</i> </a>
+            </div>
+            <div>
+
+                <ul class="nav navbar-nav">
+
+                    {% for menunit in menu %}
+                       <li><a href="{{ menunit.path }}"><i class="{{ menunit.imgurl }}">{{ menunit.name }}</i></a></li>
+                    {% endfor %}
+
+
+                </ul>
+
+                {% if session.username %}
+
+                     <a href="loginout" style="float: right;padding: 15px 8px 8px 0;margin: auto">  <i class="icon icon-off icon-larger" style="color:white;">退出</i></a>
+{#                <div id="userlogin" style="float: right;padding: 15px 15px;color:white" >#}
+{#                    <i class="icon-user">{{session.username}}</i>#}
+{#                </div>#}
+                {% endif %}
+
+
+            </div>
+        </div>
+    </nav>
+-->
+</header>

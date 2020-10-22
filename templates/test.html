@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<style>
+
+    .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 4.5px;
+    }
+
+    section {
+        margin: 20px;
+    }
+
+    table, table tr th, table tr td {
+        width: 80px;
+        border: 1px solid #0094ff;
+        table-layout: fixed;
+        text-align: center;
+    }
+
+    #predictvalue tr td span {
+        width: 200px;
+    }
+</style>
+
+
+{% endblock %}
+{% block content %}
+
+
+{{node}}
+
+{{node1}}
+
+
+
+{% endblock %}
+
+{% block jscontent %}
+    {{ super() }}
+    <script >
+
+    </script>
+<script type="text/javascript" src="../static/js/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async ></script>
+
+
+
+{% endblock jscontent %}
